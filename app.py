@@ -12,7 +12,7 @@ st.markdown("<h1 style='text-align: center;'>Your Custom ChatGPT Assistant 😬<
 
 # Configure Azure OpenAI Service API
 openai.api_type = "azure"
-openai.api_version = "2023-03-15-preview"
+openai.api_version = "2023-07-01-preview"
 openai.api_base = os.getenv('OPENAI_API_BASE')
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -41,11 +41,13 @@ counter_placeholder = st.sidebar.empty()
 counter_placeholder.write(f"Total cost of this conversation: ${st.session_state['total_cost']:.5f}")
 clear_button = st.sidebar.button("Clear Conversation", key="clear")
 
-# Map model names to OpenAI model IDs
-if model_name == "GPT-3.5":
-    model = "gpt-35-turbo"
-else:
-    model = "gpt-4"
+# # Map model names to OpenAI model IDs
+# if model_name == "GPT-3.5":
+#     model = "gpt-35-turbo"
+# else:
+#     model = "gpt-4"
+
+model = "gpt-4-tt"
 
 # reset everything
 if clear_button:

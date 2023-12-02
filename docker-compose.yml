@@ -2,7 +2,7 @@ services:
   streamlit:
     build: .
     environment:
-      OPENAI_API_BASE: '........'
-      OPENAI_API_KEY: '........'
+      OPENAI_API_BASE: 'https://openai-bottum-france.openai.azure.com/'
+      OPENAI_API_KEY: '13f668bdda354088ba9c441486d90c57'
     ports:
       - '80:8080'
