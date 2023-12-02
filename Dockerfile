@@ -12,7 +12,7 @@ COPY . .
 ENV OPENAI_API_KEY=$OPENAI_API_KEY
 ENV OPENAI_API_BASE=$OPENAI_API_BASE
 
-EXPOSE 8501
+EXPOSE 8080
 
 # Run
-ENTRYPOINT streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+ENTRYPOINT streamlit run app.py --server.port=8080 --server.address=0.0.0.0

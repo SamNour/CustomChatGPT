@@ -1,3 +1,4 @@
-streamlit==1.22.0
+streamlit
 streamlit-chat
 openai==0.27.7
+altair<5
