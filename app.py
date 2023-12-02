@@ -1,3 +1,5 @@
+import math
+import random
 import openai
 import os
 import streamlit as st
@@ -50,7 +52,9 @@ def requestOrReturnCachedApi(studentID):
                 return ''
 
             with open(studentID+".json", "w") as f:
+                print(r.text)
                 tokenOnly = extract_token_info(r.text)[0]
+                print(tokenOnly)
                 f.write(tokenOnly)
                 f.close()
     
@@ -96,15 +100,17 @@ def requestMoney(API_TOKEN):
         return ''
 
 def requestName(API_TOKEN):
-    r = requests.get(url = API_ENDPOINT+API_REQUEST_IDENTITY, params = "?pToken="+API_TOKEN)
+    r = requests.get(url = API_ENDPOINT+API_REQUEST_IDENTITY, params = "pToken="+API_TOKEN)
     if(r.status_code != 200):
         print("Error: Request failed with status code "+str(r.status_code))
         return ''
     try:
         parsed = r.text[r.text.index("<vorname>")+9:r.text.index("</vorname>")]+" "+r.text[r.text.index("<familienname>")+14:r.text.index("</familienname>")]
-        return parsed
+        return ' ' + parsed
     except Exception as e:
         print("Error: Parsing failed")
+        print(API_TOKEN)
+        print(r.text)
         return ''
     
 
@@ -117,7 +123,7 @@ def requestLastExamResult(API_TOKEN):
         parsed = r.text[r.text.index("<lv_titel>")+10:r.text.index("</lv_titel>")]+": "+r.text[r.text.index("<uninotenamekurz>")+17:r.text.index("</uninotenamekurz>")]
         return parsed
     except Exception as e:  
-        print("Error: Parsing failed with error: "+str(e)+"\n"+r.text)
+        print("Error: Parsing failed with error: "+str(e)+"  \n"+r.text)
         return None
     
 
@@ -139,10 +145,9 @@ import pandas as pd
 with st.sidebar:
     st.title('Login With TUMOnline')
     if(os.path.isfile("ge94gok.json")):
-        st.success('Already Logged in with TUMOnline!', icon='✅')
         hf_email = "ge94gok"
         hf_pass = requestOrReturnCachedApi(hf_email)
-        st.info('Welcome ' + requestName(hf_email))
+        st.success('Already Logged in with TUMOnline!  \n Welcome' + requestName(hf_pass) + '!', icon='✅')
     else:
         hf_email = st.text_input('Enter TUMID:', type='password')
         #hf_pass = st.text_input('Enter password:', type='password')
@@ -153,7 +158,7 @@ with st.sidebar:
             first=True
             while(check==False):
                 #if ((len(hf_email) < 8) or (len(hf_email) > 8)):
-                st.warning('Please enter a valid TUMID!', icon='⚠️')
+                #st.warning('Please enter a valid TUMID!', icon='⚠️')
                 #break
                 hf_pass = requestOrReturnCachedApi(hf_email)
                 if (first and (len(hf_pass) < 30 or len(hf_pass) > 35)):
@@ -164,9 +169,27 @@ with st.sidebar:
             st.success('welcome ' + requestName(hf_pass)  + '! You can now use your customized botTUM right after you give access to your API key through TUMOnline!', icon='👉')
     
     st.markdown('ⓘ Find out more about how your data is being treated by [Azure](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/data-privacy)!')
-    st.markdown('Logo used belong to Technische Universität München.')
+    st.markdown('Logo used belongs to Technische Universität München.')
 
     languages = {"English": "en", "German": "de"}
+    query_parameters = st.experimental_get_query_params()
+    if "lang" not in query_parameters:
+        st.experimental_set_query_params(lang="en")
+        st.experimental_rerun()
+
+
+    def set_language() -> None:
+        if "selected_language" in st.session_state:
+            st.experimental_set_query_params(
+                lang=languages.get(st.session_state["selected_language"]))
+            
+    sel_lang = st.radio(
+        "Language:",
+        options=languages,
+        horizontal=True,
+        on_change=set_language,
+        key="selected_language",
+    )
 
     @st.cache_data(ttl=60*60*12)
     def fetch_emojis():
@@ -180,45 +203,12 @@ with st.sidebar:
         })
 
     '''
-    # Streamlit emoji shortcodes
-
-    Below are all the emoji shortcodes supported by Streamlit.
-
-    Shortcodes are a way to enter emojis using pure ASCII. So you can type this `:smile:` to show this
-    :smile:.
-
-    (Keep in mind you can also enter emojis directly as Unicode in your Python strings too — you don't
-    *have to* use a shortcode)
+    # Emoji cheatsheet for emoji lovers:
     '''
 
     emojis = fetch_emojis()
 
     st.table(emojis)
-
-    query_parameters = st.experimental_get_query_params()
-    if "lang" not in query_parameters:
-        st.experimental_set_query_params(lang="en")
-        st.experimental_rerun()
-
-
-    def set_language() -> None:
-        if "selected_language" in st.session_state:
-            st.experimental_set_query_params(
-                lang=languages.get(st.session_state["selected_language"]))
-
-    st.markdown('')
-    st.markdown('')
-    st.markdown('')
-    st.markdown('')
-
-    sel_lang = st.radio(
-        "Language",
-        options=languages,
-        horizontal=True,
-        on_change=set_language,
-        key="selected_language",
-    )
-
 
 ## yeet code end.
 
@@ -273,8 +263,11 @@ setup_byod(deployment_id)
 #'''
 
 
+'''
+# Welcome to your chat with BotTUM!
+'''
 
-st.title("Welcome to your chat with BotTUM!")
+#st.title("Welcome to your chat with BotTUM!")
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "avatar" : 'https://raw.githubusercontent.com/dataprofessor/streamlit-chat-avatar/master/bot-icon.png' , "content": "Hi, how may I help you with your questions about TUM?"}]
 
@@ -284,8 +277,11 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
     
 
+#a tuple of 10 funny questions for TUM:
+funny_questions = ("Tell me more about Bachelors in Information Engineering :computer:", "Tell me more about Bachelors in Management and Technology :briefcase:", "Tell me more about Bachelors in Mathematics :heavy_division_sign:", "Tell me more about Student Council services :snowman_without_snow:", "Tell me more about Bachelors in Chemistry :crystal_ball:", "Tell me more about Bachelors in Biology :microscope:", "Tell me more about Bachelors in Mechanical Engineering :mechanic:", "Tell me more about how I can apply to TUM :love_letter:", "Tell me more about Bachelors in Aerospace Engineering :gear:", "Tell me more about Bachelors in Civil Engineering :warning:")
+picked_question = funny_questions[math.floor(random.random()*10)]
 # Accept user input
-if prompt := st.chat_input("Tell me more about Bachelors in Information Engineering"):
+if prompt := st.chat_input(picked_question):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     # Display user message in chat message container
@@ -296,27 +292,16 @@ if prompt := st.chat_input("Tell me more about Bachelors in Information Engineer
         message_placeholder = st.empty()
         full_response = ""
 
+st.markdown("***")
+#!! Accept voice input
+rerun = st.button('Speak? :studio_microphone:',help="this button will allow you to speak instead of texting using your microphone")
+#if rerun:
+    #st.session_state.mic_toggle = not(st.session_state.mic_toggle)
+    
+#if st.button(':question:',help="this is a questionmark emoji"):
+    #st.session_state.messages.append({"role": "user", "content": "What is the meaning of life?"})
 
-    for response in openai.ChatCompletion.create(
-            messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-            deployment_id=deployment_id,
-            dataSources=[  # camelCase is intentional, as this is the format the API expects
-                {
-                    "type": "AzureCognitiveSearch",
-                    "parameters": {
-                        "endpoint": search_endpoint,
-                        "key": search_key,
-                        "indexName": search_index_name,
-                    }
-                }
-            ],
-            stream=True
-        ):
-            full_response += (response.choices[0].delta.content or "")
-            message_placeholder.markdown(full_response + "▌")
-    else:
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+
 
 
 
