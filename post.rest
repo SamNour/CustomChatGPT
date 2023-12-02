@@ -1,0 +1,11 @@
+curl "https://openai-bottum-france.openai.azure.com/openai/deployments/gpt-4-tt/chat/completions?api-version=2023-10-01-preview" \
+  -H "Content-Type: application/json" \
+  -H "api-key: 13f668bdda354088ba9c441486d90c57" \
+  -d {"messages": [{"role":"system","content":"You are an AI assistant that helps people find information."},{"role":"user","content":"Who is Ri"}],
+  "max_tokens": 800,
+  "temperature": 0.7,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "top_p": 0.95,
+  "stop": null
+}
