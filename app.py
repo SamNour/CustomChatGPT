@@ -4,6 +4,12 @@ import streamlit as st
 from streamlit_chat import message
 import os, requests
 
+st.markdown("""
+    <style>
+        .stDeployButton {display:none;}
+    </style>
+""", unsafe_allow_html=True)
+
 '''
     Place for the AI keys and stuff
 '''
