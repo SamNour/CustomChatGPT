@@ -6,6 +6,52 @@ import streamlit as st
 from streamlit_chat import message
 import os, requests
 
+#'''
+#    Place for the AI keys and stuff
+#'''
+openai.api_type = "azure"
+# Azure OpenAI on your own data is only supported by the 2023-08-01-preview API version
+openai.api_version = "2023-08-01-preview"
+
+# Azure OpenAI setup
+openai.api_base = "https://openai-bottum-france.openai.azure.com/" # Add your endpoint here
+openai.api_key = os.getenv("OPENAI_API_KEY") # Add your OpenAI API key here
+deployment_id = "gpt-4-tt" # Add your deployment ID here
+
+# Azure AI Search setup
+search_endpoint = "https://azureaisearch-bottum.search.windows.net"; # Add your Azure AI Search endpoint here
+search_key = os.getenv("SEARCH_KEY"); # Add your Azure AI Search admin key here
+search_index_name = "michelle2"; # Add your Azure AI Search index name here
+
+
+def setup_byod(deployment_id: str) -> None:
+    """Sets up the OpenAI Python SDK to use your own data for the chat endpoint.
+
+    :param deployment_id: The deployment ID for the model to use with your own data.
+
+    To remove this configuration, simply set openai.requestssession to None.
+    """
+
+    class BringYourOwnDataAdapter(requests.adapters.HTTPAdapter):
+
+        def send(self, request, **kwargs):
+            request.url = f"{openai.api_base}/openai/deployments/{deployment_id}/extensions/chat/completions?api-version={openai.api_version}"
+            return super().send(request, **kwargs)
+
+    session = requests.Session()
+
+    # Mount a custom adapter which will use the extensions endpoint for any call using the given `deployment_id`
+    session.mount(
+        prefix=f"{openai.api_base}/openai/deployments/{deployment_id}",
+        adapter=BringYourOwnDataAdapter()
+    )
+
+    openai.requestssession = session
+
+setup_byod(deployment_id)
+
+
+
 ##Code added by Yeet for TUMONLINE
 
 st.set_page_config(page_title="BotTUM Chat", page_icon="https://www.tum.de/favicon.ico", layout="wide", initial_sidebar_state="expanded")
@@ -212,52 +258,6 @@ with st.sidebar:
 
 ## yeet code end.
 
-
-
-#'''
-#    Place for the AI keys and stuff
-#'''
-openai.api_type = "azure"
-# Azure OpenAI on your own data is only supported by the 2023-08-01-preview API version
-openai.api_version = "2023-08-01-preview"
-
-# Azure OpenAI setup
-openai.api_base = "https://openai-bottum-france.openai.azure.com/" # Add your endpoint here
-openai.api_key = os.getenv("OPENAI_API_KEY") # Add your OpenAI API key here
-deployment_id = "gpt-4-tt" # Add your deployment ID here
-
-# Azure AI Search setup
-search_endpoint = "https://azureaisearch-bottum.search.windows.net"; # Add your Azure AI Search endpoint here
-search_key = os.getenv("SEARCH_KEY"); # Add your Azure AI Search admin key here
-search_index_name = "michelle2"; # Add your Azure AI Search index name here
-
-
-def setup_byod(deployment_id: str) -> None:
-    """Sets up the OpenAI Python SDK to use your own data for the chat endpoint.
-
-    :param deployment_id: The deployment ID for the model to use with your own data.
-
-    To remove this configuration, simply set openai.requestssession to None.
-    """
-
-    class BringYourOwnDataAdapter(requests.adapters.HTTPAdapter):
-
-        def send(self, request, **kwargs):
-            request.url = f"{openai.api_base}/openai/deployments/{deployment_id}/extensions/chat/completions?api-version={openai.api_version}"
-            return super().send(request, **kwargs)
-
-    session = requests.Session()
-
-    # Mount a custom adapter which will use the extensions endpoint for any call using the given `deployment_id`
-    session.mount(
-        prefix=f"{openai.api_base}/openai/deployments/{deployment_id}",
-        adapter=BringYourOwnDataAdapter()
-    )
-
-    openai.requestssession = session
-
-setup_byod(deployment_id)
-
 #'''
 #    Place for UI
 #'''
@@ -280,6 +280,11 @@ for message in st.session_state.messages:
 #a tuple of 10 funny questions for TUM:
 funny_questions = ("Tell me more about Bachelors in Information Engineering :computer:", "Tell me more about Bachelors in Management and Technology :briefcase:", "Tell me more about Bachelors in Mathematics :heavy_division_sign:", "Tell me more about Student Council services :snowman_without_snow:", "Tell me more about Bachelors in Chemistry :crystal_ball:", "Tell me more about Bachelors in Biology :microscope:", "Tell me more about Bachelors in Mechanical Engineering :mechanic:", "Tell me more about how I can apply to TUM :love_letter:", "Tell me more about Bachelors in Aerospace Engineering :gear:", "Tell me more about Bachelors in Civil Engineering :warning:")
 picked_question = funny_questions[math.floor(random.random()*10)]
+
+st.markdown("***")
+#!! Accept voice input
+rerun = st.button('Speak? :studio_microphone:',help="this button will allow you to speak instead of texting using your microphone")
+
 # Accept user input
 if prompt := st.chat_input(picked_question):
     # Add user message to chat history
@@ -292,9 +297,7 @@ if prompt := st.chat_input(picked_question):
         message_placeholder = st.empty()
         full_response = ""
 
-st.markdown("***")
-#!! Accept voice input
-rerun = st.button('Speak? :studio_microphone:',help="this button will allow you to speak instead of texting using your microphone")
+
 #if rerun:
     #st.session_state.mic_toggle = not(st.session_state.mic_toggle)
     
