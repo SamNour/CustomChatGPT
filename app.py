@@ -279,7 +279,8 @@ def userInput():
         st.rerun()
         #st.chat_input(picked_question, disabled=False, key=None)
     for response in main_process(
-            [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages[1:]]
+            [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages[1:]],
+            True
         ):
             print(response)
             full_response += (response["choices"][0]["delta"].get("content", None) or "")

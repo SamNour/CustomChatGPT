@@ -11,8 +11,6 @@ The intentions you can detect are:
 
 "Emotional, Personal or Sensitive",
 
-"Engineering and Natural Sciences",
-
 "Modules and Courses",
 
 "Thesis",

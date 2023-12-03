@@ -107,8 +107,34 @@ Each source has a name followed by colon and the actual information, always incl
 
 
 
-def main_process(messages):
+def main_process(messages, use_old: bool):
+    if not messages:
+        return []
+    
+    if use_old:
+        return make_query(
+            messages,
+            True, True
+        )
+
     # Detecting an intent
     with open("./prompts/chat.txt", "r") as file:
         res = make_query(messages, False, False, "", file.read())
-    print(res)
+    
+    categories = {
+        "Emotional, Personal or Sensitive": "./refer_to_manager.txt",
+        "Modules and Courses": "./ground_courses.txt",
+        "Thesis": "./group_thesis.txt",
+        "Bachelor's Thesis": "./ground_bachelor.txt",
+        "Master's Thesis": "./ground_masters.txt",
+        "Documents": "./ground_documents.txt",
+        "Grade Management": "./ground_grade.txt",
+        "Application": "./ground_application.txt",
+        "Certificates, Credit transfers, Transcript of records, Project studies":  "./ground_certificates.txt",
+        "Course Schedules": "./ground_schedules.txt",
+        "Registration Problems": "./ground_registration.txt",
+        "Examination board Applications": "./ground_examination_board.txt",
+        "Going Abroad": "./ground_going_abroad.txt",
+        "Incoming Exchange Students": "./ground_incoming_exchange.txt",
+        "International Partners": "./ground_international_pa"
+    }
