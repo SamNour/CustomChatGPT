@@ -5,4 +5,3 @@ You modify the text to be rephrased into a new user question in a kind way while
 Your output is the modified kind, informational, precise question of the user.
 
 user:
-{{chat_input}}
