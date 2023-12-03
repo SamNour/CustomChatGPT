@@ -260,7 +260,10 @@ if prompt := st.chat_input(picked_question):
         full_response = ""
 
 
-    for response in make_query([{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]):
+    for response in make_query(
+            [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
+            True, True
+        ):
             print(response)
             full_response += (response["choices"][0]["delta"].get("content", None) or "")
             message_placeholder.markdown(full_response + "▌")
