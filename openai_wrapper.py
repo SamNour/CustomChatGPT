@@ -1,6 +1,7 @@
 import openai
 from promptflow import tool
 import requests
+from typing import Optional
 
 
 # Place for the AI keys and stuff
@@ -39,4 +40,57 @@ def setup_byod(deployment_id: str) -> None:
     openai.requestssession = session
 
 setup_byod(deployment_id)
-print("I was here")
+
+
+def make_query(
+        messages,
+        stream: bool,
+        use_search: bool,
+        system_prompt: str = 
+            """
+Your name is botTUM. You are:
+- a helpful and kind assistant for students at the Technical University of Munich (Technische Universität München). Your job is to answer students’ queries about their studies and student life. If the student asks you to write an email or write a todo list, do it. You always strive to give answers specific to the student and personalize them as much as you can. Be brief in your answers.
+- a good friend to the students at the Technical University of Munich (Technische Universität München). You have to be able to detect the sentiment of the student (happy/sad/anxious/worried/angry) and respond accordingly. End your responses with a suitable emoji.
+
+You should answer only with the facts listed in the list of sources below. If there is not enough information below, admit you don't know or. If asking a clarifying question to the student would help, ask the question.
+Do not generate answers that don’t use the sources below.
+
+If you know which study program the student belongs to and are asked about something related about the study program that you don't know about, tell the student that their inquiry can be answered by the corresponding TUM program manager.
+Advise the student to contact the the program manager for a personal consultation or more information by giving them all contact information you have on their program manager.
+Include in your output an additional link to the resource with all contacts here: https://www.mgt.tum.de/programs/bachelor-management-technology/munich/for-current-students#c1771
+
+If it is unknown which study program the student belongs to, inform them that they can also send in a request form to the student council with the following link:
+https://www.mgt.tum.de/forms/contact-for-further-topics.
+
+Also give the resources on the general student advisory to the student for legal, mental health or stress management consultation. 
+
+Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, e.g. [info1.txt]. Don’t combine sources, list each source separately, e.g. [info1.txt][info2.pdf][info3.pptx][info4.docx].
+            """,
+        tool_prompt: Optional[str] = None):
+    if tool_prompt:
+        system_prompt += "\n" + tool_prompt
+    if not use_search:
+        messages = [{
+            "role": "system",
+            "content": system_prompt
+        }] + messages
+    return openai.ChatCompletion.create(
+        messages=messages,
+        deployment_id=deployment_id,
+        **({"dataSources": [  # camelCase is intentional, as this is the format the API expects
+            {
+                "type": "AzureCognitiveSearch",
+                "parameters": {
+                    "endpoint": search_endpoint,
+                    "key": search_key,
+                    "indexName": search_index_name,
+                    "embeddingEndpoint": f"{openai.api_base}/openai/deployments/ada-tt/embeddings?api-version={openai.api_version}",
+                    "embeddingKey": openai.api_key,
+                    "queryType": "vectorSimpleHybrid",
+                    "roleInformation": system_prompt
+                }
+            }
+        ]} if use_search else {}),
+        temperature=.4,
+        stream=stream
+    )

@@ -260,26 +260,7 @@ if prompt := st.chat_input(picked_question):
         full_response = ""
 
 
-    for response in openai.ChatCompletion.create(
-            messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-            deployment_id=deployment_id,
-            dataSources=[  # camelCase is intentional, as this is the format the API expects
-                {
-                    "type": "AzureCognitiveSearch",
-                    "parameters": {
-                        "endpoint": search_endpoint,
-                        "key": search_key,
-                        "indexName": search_index_name,
-                        "embeddingEndpoint": f"{openai.api_base}/openai/deployments/ada-tt/embeddings?api-version={openai.api_version}",
-                        "embeddingKey": openai.api_key,
-                        "queryType": "vectorSimpleHybrid",
-                        "roleInformation": "Your name is botTUM. You are a helpful and kind assistant for students at the Technical University of Munich (Technische Universität München). Your job is to answer students’ queries about their studies. Be brief in your answers. You should answer only with the facts listed in the list of sources below. If there is not enough information below, say you don’t know. Do not generate answers that don’t use the sources below. If asking a clarifying question to the user would help, ask the question. Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, e.g. [info1.txt]. Don’t combine sources, list each source separately, e.g. [info1.txt][info2.pdf][info3.pptx][info4.docx]."
-                    }
-                }
-            ],
-            temperature=.4,
-            stream=True
-        ):
+    for response in make_query([{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]):
             print(response)
             full_response += (response["choices"][0]["delta"].get("content", None) or "")
             message_placeholder.markdown(full_response + "▌")
