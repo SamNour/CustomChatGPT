@@ -266,16 +266,6 @@ def userInput():
             full_response = ""
 
 
-        for response in make_query(
-                [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-                True, True
-            ):
-                print(response)
-                full_response += (response["choices"][0]["delta"].get("content", None) or "")
-                message_placeholder.markdown(full_response + "▌")
-        else:
-            message_placeholder.markdown(full_response)
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
         #st.rerun()
 
         #Romans fucked code:
@@ -285,10 +275,10 @@ def userInput():
             ):
                 print(response)
                 full_response += (response["choices"][0]["delta"].get("content", None) or "")
-                #message_placeholder.markdown(full_response + "▌")
-        #else:
-        #    message_placeholder.markdown(full_response)
-        #st.session_state.messages.append({"role": "assistant", "content": full_response})
+                message_placeholder.markdown(full_response + "▌")
+        else:
+            message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
 
         #end of Romans fucked code
         st.rerun()
