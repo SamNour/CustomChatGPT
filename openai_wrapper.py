@@ -40,5 +40,3 @@ def setup_byod(deployment_id: str) -> None:
 
 setup_byod(deployment_id)
 print("I was here")
-
-def make_query()
