@@ -8,7 +8,7 @@ This is a UI implementation done with Python that contacts Azure OpenAI servers 
 It was implemented in the Hackathon between TUM and Microsoft.
 
 <p align="center">
-  <img src="resources for Sample_Screenshot.png">
+  <img src="Sample_Screenshot.png">
 </p>
 
 ### How to run it?
