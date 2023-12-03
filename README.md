@@ -1,6 +1,6 @@
 # UI for BotTUM Custom AI bot for TUM students and possible TUM students
 
-The initial UI elements have been forked from https://github.com/MG-Microsoft/CustomChatGPT[original]
+The initial UI elements have been forked from [original](https://github.com/MG-Microsoft/CustomChatGPT)
 
 ### What is this?
 This is a UI implementation done with Python that contacts Azure OpenAI servers with custom API to retrieve responds to questions with LLM specifically curated for people interested in TUM questions.
