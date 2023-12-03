@@ -21,4 +21,4 @@ after installing requirements, you can initialize the Streamlit GUI using:
 ```python
 streamlit run app.py --server.port=8082 --server.address=0.0.0.0
 ```
-after that, in Windows, the server will run on [localhost:8082](localhost:8082) and on [0.0.0.0:8082](0.0.0.0:8082) in Linux.
+after that, in Windows, the server will run on [https://localhost:8082](https://localhost:8082) and on [https://0.0.0.0:8082](https://0.0.0.0:8082) in Linux.
