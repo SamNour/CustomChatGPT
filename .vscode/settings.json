@@ -10,5 +10,6 @@
     "terminal.integrated.env.osx": {
         "OPENAI_API_KEY": "13f668bdda354088ba9c441486d90c57",
         "SEARCH_KEY": "NElngw2d8eVnBatvpiJlfcAT3l6FrfmFQGINybEenIAzSeD4xiue"
-    }
+    },
+    "python.terminal.activateEnvironment": true
 }

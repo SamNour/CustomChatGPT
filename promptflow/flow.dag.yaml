@@ -1,0 +1,533 @@
+id: template_chat_flow
+name: Template Chat Flow
+inputs:
+  chat_history:
+    type: list
+    default:
+    - inputs:
+        Q2_insult: Can you recommend a person that can help me with my stress
+        Q3_semi_rude: I don't really like you, but I have a question. Who can I contact?
+        Q4_sensitive: My dog died and I am really stressed. I am studying Managment
+          Technology in the Bachelor in Heilbronn
+      outputs:
+        ans_kind_question: I'm feeling a bit overwhelmed due to the recent loss of my
+          dog and I'm also currently pursuing a Bachelor's in Management
+          Technology in Heilbronn. Could you provide some advice or support to
+          ease the situation?
+        ans_rudeness_check: Passed
+    - inputs:
+        Q2_insult: I want to know more about Bachelor Management technology
+        Q3_semi_rude: I don't really like you, but I have a question. Who can I contact?
+        Q4_sensitive: My dog died and I am really stressed. I am studying Managment
+          Technology in the Bachelor in Heilbronn
+      outputs:
+        ans_kind_question: I'm really sorry to hear about your dog. It can be stressful
+          to balance grief and studying. Could you suggest some resources or
+          strategies to manage stress while studying Management Technology at
+          the Bachelor level in Heilbronn?
+        ans_rudeness_check: Passed
+    is_chat_input: false
+    is_chat_history: true
+  Q2_insult:
+    type: string
+    default: I want to know more about Bachelor Management technology
+    is_chat_input: true
+  Q3_semi_rude:
+    type: string
+    default: I don't really like you, but I have a question. Who can I contact?
+    is_chat_input: false
+  Q4_sensitive:
+    type: string
+    default: My dog died and I am really stressed. I am studying Managment
+      Technology in the Bachelor in Heilbronn
+    is_chat_input: false
+outputs:
+  ans_kind_question:
+    type: string
+    reference: ${filter_input.output}
+    is_chat_output: true
+  ans_rudeness_check:
+    type: string
+    reference: ${rudeness_checker.output}
+    is_chat_output: false
+nodes:
+- name: rudeness_checker
+  type: llm
+  source:
+    type: code
+    path: rudeness_checker.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.4
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    Q3_semi_rude: ${inputs.Q3_semi_rude}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: filter_input
+  type: llm
+  source:
+    type: code
+    path: filter_input.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 1
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    Q4_sensitive: ${inputs.Q4_sensitive}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: detect_intent
+  type: llm
+  source:
+    type: code
+    path: chat.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.1
+    top_p: 1
+    stop: ""
+    max_tokens: 256
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: terminate_chat
+  type: llm
+  source:
+    type: code
+    path: terminate_chat.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 1
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${inputs.Q2_insult}
+    is: failed
+  use_variants: false
+- name: refer_to_program_manager
+  type: llm
+  source:
+    type: code
+    path: refer_to_program_manager.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: refer_to_coordinator
+  type: llm
+  source:
+    type: code
+    path: refer_to_manager.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 1
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_courses
+  type: llm
+  source:
+    type: code
+    path: ground_courses.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_thesis
+  type: llm
+  source:
+    type: code
+    path: ground_thesis.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_bachelor
+  type: llm
+  source:
+    type: code
+    path: ground_bachelor.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_master
+  type: llm
+  source:
+    type: code
+    path: ground_master.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_documents
+  type: llm
+  source:
+    type: code
+    path: ground_documents.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Documents"'
+  use_variants: false
+- name: ground_grade
+  type: llm
+  source:
+    type: code
+    path: ground_grade.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Grade Management"'
+  use_variants: false
+- name: ground_application
+  type: llm
+  source:
+    type: code
+    path: ground_application.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Application"'
+  use_variants: false
+- name: ground_certificates
+  type: llm
+  source:
+    type: code
+    path: ground_certificates.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_course_schedules
+  type: llm
+  source:
+    type: code
+    path: ground_course_schedules.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_registration_probs
+  type: llm
+  source:
+    type: code
+    path: ground_registration_probs.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_examination_board
+  type: llm
+  source:
+    type: code
+    path: ground_examination_board.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Examination board Applications"'
+  use_variants: false
+- name: ground_going_abroad
+  type: llm
+  source:
+    type: code
+    path: ground_going_abroad.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_incoming_exchange
+  type: llm
+  source:
+    type: code
+    path: ground_incoming_exchange.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Incoming Exchange Students"'
+  use_variants: false
+- name: grounding_international_partners
+  type: llm
+  source:
+    type: code
+    path: grounding_international_partners.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"International Partners"'
+  use_variants: false
+- name: ground_doctoral
+  type: llm
+  source:
+    type: code
+    path: ground_doctoral.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: ground_getting_started
+  type: llm
+  source:
+    type: code
+    path: ground_getting_started.jinja2
+  inputs:
+    deployment_name: gpt-4-tt
+    temperature: 0.5
+    top_p: 1
+    stop: ""
+    max_tokens: 0
+    presence_penalty: 0
+    frequency_penalty: 0
+    logit_bias: ""
+    ans_kind_question: ${filter_input.output}
+    chat_history: ${inputs.chat_history}
+  provider: AzureOpenAI
+  connection: openai-bottum-connection
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+node_variants: {}
+environment:
+  python_requirements_txt: requirements.txt

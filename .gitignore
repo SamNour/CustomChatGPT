@@ -1,1 +1,5 @@
 /venv/
+**/.promptflow
+**/.runs
+**/__pycache__
+ge**.json

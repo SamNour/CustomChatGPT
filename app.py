@@ -1,50 +1,11 @@
 import math
 import random
-import openai
 import os
 import streamlit as st
 from streamlit_chat import message
-import os, requests
-from promptflow import tool
+import os
 import json
-
-# Place for the AI keys and stuff
-openai.api_type = "azure"
-openai.api_version = "2023-08-01-preview"
-openai.api_base = "https://openai-bottum-france.openai.azure.com/"
-openai.api_key = '13f668bdda354088ba9c441486d90c57'
-deployment_id = "gpt-4-tt"
-
-search_endpoint = "https://azureaisearch-bottum.search.windows.net"
-search_key = 'NElngw2d8eVnBatvpiJlfcAT3l6FrfmFQGINybEenIAzSeD4xiue'
-search_index_name = "index-tt11"
-
-def setup_byod(deployment_id: str) -> None:
-    """Sets up the OpenAI Python SDK to use your own data for the chat endpoint.
-
-    :param deployment_id: The deployment ID for the model to use with your own data.
-
-    To remove this configuration, simply set openai.requestssession to None.
-    """
-
-    class BringYourOwnDataAdapter(requests.adapters.HTTPAdapter):
-
-        def send(self, request, **kwargs):
-            request.url = f"{openai.api_base}/openai/deployments/{deployment_id}/extensions/chat/completions?api-version={openai.api_version}"
-            return super().send(request, **kwargs)
-
-    session = requests.Session()
-
-    # Mount a custom adapter which will use the extensions endpoint for any call using the given `deployment_id`
-    session.mount(
-        prefix=f"{openai.api_base}/openai/deployments/{deployment_id}",
-        adapter=BringYourOwnDataAdapter()
-    )
-
-    openai.requestssession = session
-
-setup_byod(deployment_id)
-
+from openai_wrapper import *
 
 
 ##Code added by Yeet for TUMONLINE
@@ -64,8 +25,6 @@ API_TOKENASK = "requestToken"
 API_REQUEST_MONEY = "studienbeitragsstatus"
 API_REQUEST_IDENTITY = "id"
 API_REQUEST_EXAMS = "noten"
-
-#API_TOKEN = "38082AA281635080C59ED8BCFE0B91F1"#meh forgot to remove so will cancel this put anyways
 
 import requests
 import os.path
@@ -216,7 +175,7 @@ with st.sidebar:
     query_parameters = st.experimental_get_query_params()
     if "lang" not in query_parameters:
         st.experimental_set_query_params(lang="en")
-        st.experimental_rerun()
+        st.rerun()
 
 
     def set_language() -> None:
@@ -247,9 +206,9 @@ with st.sidebar:
     # Emoji cheatsheet for emoji lovers:
     '''
 
-    emojis = fetch_emojis()
+    # emojis = fetch_emojis()
 
-    st.table(emojis)
+    # st.table(emojis)
 
 ## yeet code end.
 
