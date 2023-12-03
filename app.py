@@ -202,9 +202,9 @@ with st.sidebar:
             'Shortcodes': [f':{code}:' for code in codes],
         })
 
-    '''
-    # Emoji cheatsheet for emoji lovers:
-    '''
+    #'''
+    ## Emoji cheatsheet for emoji lovers:
+    #'''
 
     # emojis = fetch_emojis()
 
@@ -225,7 +225,7 @@ with st.sidebar:
 
 col1, mid, col2 = st.columns([1,1,20])
 with col1:
-    st.image('https://www.tum.de/favicon.ico', width=60)
+    st.image('https://drive.google.com/uc?id=1fOtufH7cumL9zGWv42LoioHE72au7a6p', width=120)
 with col2:
     st.header('Welcome to your chat with BotTUM!')
 
