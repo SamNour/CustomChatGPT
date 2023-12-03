@@ -248,7 +248,8 @@ picked_question = funny_questions[0]#[math.floor(random.random()*10)]
 #rerun = st.button('Speak? :studio_microphone:',help="this button will allow you to speak instead of texting using your microphone")
 
 # Accept user input
-if prompt := st.chat_input(picked_question):
+prompt = st.chat_input(picked_question)
+if prompt:
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     # Display user message in chat message container
@@ -260,9 +261,8 @@ if prompt := st.chat_input(picked_question):
         full_response = ""
 
 
-    for response in make_query(
-            [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-            True, True
+    for response in main_process(
+            [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages[1:]]
         ):
             print(response)
             full_response += (response["choices"][0]["delta"].get("content", None) or "")

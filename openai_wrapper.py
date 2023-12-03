@@ -39,7 +39,8 @@ def setup_byod(deployment_id: str) -> None:
 
     openai.requestssession = session
 
-setup_byod(deployment_id)
+def disable_byod():
+    openai.requestssession = None
 
 
 def make_query(
@@ -71,13 +72,16 @@ Each source has a name followed by colon and the actual information, always incl
         system_prompt += "\n" + tool_prompt
     if not use_search:
         messages = [{
-            "role": "system",
+            "role": "assistant",
             "content": system_prompt
         }] + messages
-    return openai.ChatCompletion.create(
-        messages=messages,
-        deployment_id=deployment_id,
-        **({"dataSources": [  # camelCase is intentional, as this is the format the API expects
+    else:
+        setup_byod(deployment_id)
+    
+    inp = {
+        "messages": messages,
+        **({"deployment_id": deployment_id,
+            "dataSources": [  # camelCase is intentional, as this is the format the API expects
             {
                 "type": "AzureCognitiveSearch",
                 "parameters": {
@@ -90,7 +94,21 @@ Each source has a name followed by colon and the actual information, always incl
                     "roleInformation": system_prompt
                 }
             }
-        ]} if use_search else {}),
-        temperature=.4,
-        stream=stream
-    )
+        ]} if use_search else {
+            "engine": deployment_id
+        }),
+        "temperature": .4,
+        **({"stream": stream} if stream else {})
+    }
+    try:
+        return openai.ChatCompletion.create(**inp)
+    finally:
+        disable_byod()
+
+
+
+def main_process(messages):
+    # Detecting an intent
+    with open("./prompts/chat.txt", "r") as file:
+        res = make_query(messages, False, False, "", file.read())
+    print(res)
