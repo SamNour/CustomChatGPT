@@ -223,8 +223,9 @@ with st.sidebar:
 
 
 
-col1, mid, col2 = st.columns([1,1,20])
+col1, mid, col2 = st.columns([1,1,23])
 with col1:
+    #@st.cache
     st.image('https://drive.google.com/uc?id=1fOtufH7cumL9zGWv42LoioHE72au7a6p', width=120)
 with col2:
     st.header('Welcome to your chat with BotTUM!')
@@ -240,8 +241,12 @@ for message in st.session_state.messages:
     
 
 #a tuple of 10 funny questions for TUM:
-funny_questions = ("Tell me more about Bachelors in Information Engineering", "Tell me more about Bachelors in Management and Technology :briefcase:", "Tell me more about Bachelors in Mathematics :heavy_division_sign:", "Tell me more about Student Council services :snowman_without_snow:", "Tell me more about Bachelors in Chemistry :crystal_ball:", "Tell me more about Bachelors in Biology :microscope:", "Tell me more about Bachelors in Mechanical Engineering :mechanic:", "Tell me more about how I can apply to TUM :love_letter:", "Tell me more about Bachelors in Aerospace Engineering :gear:", "Tell me more about Bachelors in Civil Engineering :warning:")
-picked_question = funny_questions[0]#[math.floor(random.random()*10)]
+funny_questions = ("Tell me more about Bachelors in Information Engineering", "Tell me more about Bachelors in Management and Technology", "Tell me more about Professors teaching Information Engineering", "Tell me more about Student Council services", "Tell me more about Bachelors in Chemistry", "Tell me more about Bachelors in Biology", "Tell me more about Bachelors in Mechanical Engineering", "Tell me more about how I can apply to TUM", "Tell me more about Bachelors in Aerospace Engineering", "Tell me more about Professors in Management")
+@st.cache_data(ttl=60*60*12)
+def get_random_question():
+    return funny_questions[math.floor(random.random()*10)]
+picked_question = get_random_question()
+#picked_question = funny_questions[0]
 
 #st.markdown("***")
 #!! Accept voice input
