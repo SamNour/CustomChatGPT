@@ -12,6 +12,8 @@ from openai_wrapper import *
 
 st.set_page_config(page_title="BotTUM Chat", page_icon="https://www.tum.de/favicon.ico", layout="wide", initial_sidebar_state="expanded")
 
+
+
 st.markdown("""
     <style>
         .stDeployButton {display:none;}
@@ -252,27 +254,32 @@ picked_question = get_random_question()
 #!! Accept voice input
 #rerun = st.button('Speak? :studio_microphone:',help="this button will allow you to speak instead of texting using your microphone")
 
+def userInput():
+    if prompt := st.chat_input(picked_question,disabled=False,key=None):
+        st.chat_input(picked_question, key="disabled_chat_input", disabled=True)
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        # Display user message in chat message container
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+
+
+        for response in make_query(
+                [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
+                True, True
+            ):
+                print(response)
+                full_response += (response["choices"][0]["delta"].get("content", None) or "")
+                message_placeholder.markdown(full_response + "▌")
+        else:
+            message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.rerun()
+        #st.chat_input(picked_question, disabled=False, key=None)
+
 # Accept user input
-if prompt := st.chat_input(picked_question):
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-
-
-    for response in make_query(
-            [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-            True, True
-        ):
-            print(response)
-            full_response += (response["choices"][0]["delta"].get("content", None) or "")
-            message_placeholder.markdown(full_response + "▌")
-    else:
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
-
+userInput()
