@@ -6,6 +6,11 @@ The initial UI elements have been forked from [original](https://github.com/MG-M
 This is a UI implementation done with Python that contacts Azure OpenAI servers with custom API to retrieve responds to questions with LLM specifically curated for people interested in TUM questions.
 
 It was implemented in the Hackathon between TUM and Microsoft.
+
+<p align="center">
+  <img src="resources for Sample_Screenshot.png">
+</p>
+
 ### How to run it?
 
 after cloning the repo,
