@@ -9,29 +9,46 @@ inputs:
         Q3_semi_rude: I don't really like you, but I have a question. Who can I contact?
         Q4_sensitive: My dog died and I am really stressed. I am studying Managment
           Technology in the Bachelor in Heilbronn
+        chat_input: I want to know more about Bachelor Management technology
       outputs:
-        ans_kind_question: I'm feeling a bit overwhelmed due to the recent loss of my
-          dog and I'm also currently pursuing a Bachelor's in Management
-          Technology in Heilbronn. Could you provide some advice or support to
-          ease the situation?
-        ans_rudeness_check: Passed
+        ans_kind_question: Could you please provide more information about the
+          Bachelor's degree in Management Technology?
+        ans_rudeness_check: passed
     - inputs:
-        Q2_insult: I want to know more about Bachelor Management technology
+        Q2_insult: Can you recommend a person that can help me with my stress
         Q3_semi_rude: I don't really like you, but I have a question. Who can I contact?
         Q4_sensitive: My dog died and I am really stressed. I am studying Managment
           Technology in the Bachelor in Heilbronn
+        chat_input: it's in munich
       outputs:
-        ans_kind_question: I'm really sorry to hear about your dog. It can be stressful
-          to balance grief and studying. Could you suggest some resources or
-          strategies to manage stress while studying Management Technology at
-          the Bachelor level in Heilbronn?
-        ans_rudeness_check: Passed
+        ans_kind_question: Could you please confirm if it is located in Munich?
+        ans_rudeness_check: passed
+    - inputs:
+        Q2_insult: Can you recommend a person that can help me with my stress
+        Q3_semi_rude: I don't really like you, but I have a question. Who can I contact?
+        Q4_sensitive: My dog died and I am really stressed. I am studying Managment
+          Technology in the Bachelor in Heilbronn
+        chat_input: yes
+      outputs:
+        ans_kind_question: Could you please provide more context or information so I may
+          assist you effectively?
+        ans_rudeness_check: passed
+    - inputs:
+        Q2_insult: Can you recommend a person that can help me with my stress
+        Q3_semi_rude: I don't really like you, but I have a question. Who can I contact?
+        Q4_sensitive: My dog died and I am really stressed. I am studying Managment
+          Technology in the Bachelor in Heilbronn
+        chat_input: no
+      outputs:
+        ans_kind_question: Sorry, it seems like you haven't asked a question yet. Could
+          you kindly explain what you want to talk about or ask?
+        ans_rudeness_check: passed
     is_chat_input: false
     is_chat_history: true
   Q2_insult:
     type: string
-    default: I want to know more about Bachelor Management technology
-    is_chat_input: true
+    default: Can you recommend a person that can help me with my stress
+    is_chat_input: false
   Q3_semi_rude:
     type: string
     default: I don't really like you, but I have a question. Who can I contact?
@@ -41,6 +58,10 @@ inputs:
     default: My dog died and I am really stressed. I am studying Managment
       Technology in the Bachelor in Heilbronn
     is_chat_input: false
+  chat_input:
+    type: string
+    default: no
+    is_chat_input: true
 outputs:
   ans_kind_question:
     type: string
@@ -65,7 +86,7 @@ nodes:
     presence_penalty: 0
     frequency_penalty: 0
     logit_bias: ""
-    Q3_semi_rude: ${inputs.Q3_semi_rude}
+    chat_input: ${inputs.chat_input}
   provider: AzureOpenAI
   connection: openai-bottum-connection
   api: chat
@@ -85,11 +106,14 @@ nodes:
     presence_penalty: 0
     frequency_penalty: 0
     logit_bias: ""
-    Q4_sensitive: ${inputs.Q4_sensitive}
+    chat_input: ${inputs.chat_input}
   provider: AzureOpenAI
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${rudeness_checker.output}
+    is: passed
   use_variants: false
 - name: detect_intent
   type: llm
@@ -131,7 +155,7 @@ nodes:
   api: chat
   module: promptflow.tools.aoai
   activate:
-    when: ${inputs.Q2_insult}
+    when: ${rudeness_checker.output}
     is: failed
   use_variants: false
 - name: refer_to_program_manager
@@ -154,6 +178,18 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: " \"Emotional, Personal or Sensitive\",  \"Engineering and Natural
+      Sciences\",  \"Modules and Courses\",  \"Thesis\",  \"Bachelor's
+      Thesis\",  \"Master's Thesis\",  \"Documents\",  \"Grade
+      Management\",  \"Application\",  \"Certificates, Credit transfers,
+      Transcript of records, Project studies\",  \"Course
+      Schedules\",  \"Registration Problems\",  \"Examination board
+      Applications\",  \"Going Abroad\",  \"Incoming Exchange
+      Students\",  \"International Partners\",  \"Doctoral
+      Program\",  \"Orientation and Getting started\",  \"Program Manager,
+      custom study plan or other\""
   use_variants: false
 - name: refer_to_coordinator
   type: llm
@@ -175,6 +211,18 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: "\"Emotional, Personal or Sensitive\",  \"Engineering and Natural
+      Sciences\",  \"Modules and Courses\",  \"Thesis\",  \"Bachelor's
+      Thesis\",  \"Master's Thesis\",  \"Documents\",  \"Grade
+      Management\",  \"Application\",  \"Certificates, Credit transfers,
+      Transcript of records, Project studies\",  \"Course
+      Schedules\",  \"Registration Problems\",  \"Examination board
+      Applications\",  \"Going Abroad\",  \"Incoming Exchange
+      Students\",  \"International Partners\",  \"Doctoral
+      Program\",  \"Orientation and Getting started\",  \"Program Manager,
+      custom study plan or other\"."
   use_variants: false
 - name: ground_courses
   type: llm
@@ -196,6 +244,18 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: " \"Emotional, Personal or Sensitive\",  \"Engineering and Natural
+      Sciences\",  \"Modules and Courses\",  \"Thesis\",  \"Bachelor's
+      Thesis\",  \"Master's Thesis\",  \"Documents\",  \"Grade
+      Management\",  \"Application\",  \"Certificates, Credit transfers,
+      Transcript of records, Project studies\",  \"Course
+      Schedules\",  \"Registration Problems\",  \"Examination board
+      Applications\",  \"Going Abroad\",  \"Incoming Exchange
+      Students\",  \"International Partners\",  \"Doctoral
+      Program\",  \"Orientation and Getting started\", \"Program Manager, custom
+      study plan or other\""
   use_variants: false
 - name: ground_thesis
   type: llm
@@ -217,6 +277,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Thesis"'
   use_variants: false
 - name: ground_bachelor
   type: llm
@@ -238,6 +301,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: "\"Bachelor's Thesis\""
   use_variants: false
 - name: ground_master
   type: llm
@@ -259,6 +325,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: "\"Bachelor's Thesis\""
   use_variants: false
 - name: ground_documents
   type: llm
@@ -350,6 +419,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Certificates, Credit transfers, Transcript of records, Project studies"'
   use_variants: false
 - name: ground_course_schedules
   type: llm
@@ -371,6 +443,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Course Schedules"'
   use_variants: false
 - name: ground_registration_probs
   type: llm
@@ -392,6 +467,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Registration Problems"'
   use_variants: false
 - name: ground_examination_board
   type: llm
@@ -437,6 +515,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Going Abroad"'
   use_variants: false
 - name: ground_incoming_exchange
   type: llm
@@ -506,6 +587,9 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Doctoral Program"'
   use_variants: false
 - name: ground_getting_started
   type: llm
@@ -527,6 +611,17 @@ nodes:
   connection: openai-bottum-connection
   api: chat
   module: promptflow.tools.aoai
+  activate:
+    when: ${detect_intent.output}
+    is: '"Orientation and Getting started"'
+  use_variants: false
+- name: collect_responses
+  type: python
+  source:
+    type: code
+    path: echo.py
+  inputs:
+    input1: ${refer_to_program_manager.output}
   use_variants: false
 node_variants: {}
 environment:
